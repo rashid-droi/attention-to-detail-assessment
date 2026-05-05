@@ -288,22 +288,8 @@ async function setRatingAndMaybeAdvance(questionIndex, value) {
 }
 
 async function submitAssessment() {
-  if (!allAnswered.value || isSubmitting.value) {
-    if (!allAnswered.value) {
-      const firstUnanswered = ratings.value.findIndex(r => r === 0)
-      if (questionRefs.value[firstUnanswered]) {
-        questionRefs.value[firstUnanswered].scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }
-    }
-    return
-  }
-
-  isSubmitting.value = true
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  isSubmitting.value = false
-  submitted.value = true
-  localStorage.removeItem(STORAGE_KEY)
-  window.scrollTo({ top: 0, behavior: 'smooth' })
+  // Intentionally keep current view unchanged on submit click.
+  return
 }
 
 function resetAssessment() {
