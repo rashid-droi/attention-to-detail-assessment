@@ -748,6 +748,8 @@ onUnmounted(() => {
 }
 
 .btn-primary {
+  border: none;
+  outline: none;
   border-radius: 14px;
   padding: 0.9rem 1.35rem;
   min-width: 240px;
