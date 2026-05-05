@@ -733,7 +733,7 @@ onUnmounted(() => {
   padding: 1.2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 1rem;
-  background: rgba(6, 30, 69, 0.32);
+  background: transparent;
   display: grid;
   gap: 0.9rem;
 }
@@ -762,7 +762,6 @@ onUnmounted(() => {
 }
 
 .btn-primary {
-  border: none;
   border-radius: 14px;
   padding: 0.9rem 1.35rem;
   min-width: 240px;
@@ -770,10 +769,8 @@ onUnmounted(() => {
   font-size: 0.95rem;
   font-weight: 800;
   letter-spacing: 0.01em;
-  background: linear-gradient(135deg, #1591c8 0%, #0b6fa2 55%, #0a557f 100%);
-  box-shadow:
-    0 12px 22px rgba(18, 100, 146, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  background: rgb(10 50 91);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: transform 0.18s ease, box-shadow 0.2s ease, filter 0.2s ease;
   display: inline-flex;
@@ -790,10 +787,9 @@ onUnmounted(() => {
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow:
-    0 16px 28px rgba(18, 100, 146, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.35);
-  filter: saturate(1.08);
+  background: #17365a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  filter: none;
 }
 
 .btn-primary:active {
