@@ -60,6 +60,18 @@
           </div>
         </div>
 
+        <!-- User Information Section -->
+        <div class="user-info-section">
+          <div class="input-group">
+            <label for="username">Full Name <span class="required">*</span></label>
+            <input id="username" type="text" v-model="username" placeholder="Enter your full name" class="premium-input" />
+          </div>
+          <div class="input-group">
+            <label for="email">Email Address <span class="optional">(Optional)</span></label>
+            <input id="email" type="email" v-model="email" placeholder="Enter your email address" class="premium-input" />
+          </div>
+        </div>
+
         <!-- Questions Section -->
         <ol class="questions-section" aria-label="Assessment questions">
           <li v-for="(question, qIndex) in questions" :key="qIndex" class="question-item"
@@ -110,7 +122,7 @@
           </div>
           <div class="action-buttons">
             <button class="btn-primary" :class="{ 'loading': isSubmitting }" :disabled="isSubmitting"
-              @click="submitAssessment">
+              @click="submitAssessment" v-if="!isSuccess">
               <span v-if="!isSubmitting">
                 Complete Assessment
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -122,6 +134,22 @@
                   <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
                 </svg>
                 Processing...
+              </span>
+            </button>
+
+            <button class="btn-primary success-btn" :class="{ 'loading': isPdfGenerating }" :disabled="isPdfGenerating"
+              @click="generatePDF" v-if="isSuccess">
+              <span v-if="!isPdfGenerating">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Download PDF Report
+              </span>
+              <span v-else>
+                <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
+                </svg>
+                Generating PDF...
               </span>
             </button>
           </div>
@@ -175,6 +203,7 @@
             <div class="interpretation-card">
               <div class="interpretation-badge">Analysis Result</div>
               <p class="interpretation-text">{{ interpretation }}</p>
+              <p class="interpretation-note">{{ interpretationNote }}</p>
               <div class="interpretation-bars">
                 <div class="bar" :style="{ width: '100%' }" data-level="excellent"></div>
                 <div class="bar" :style="{ width: totalScore >= 50 ? '100%' : '0%' }" data-level="above"></div>
@@ -199,8 +228,80 @@
                 Print Results
               </button>
             </div>
+
+            <div class="pdf-preview-panel" v-if="isSuccess">
+              <h3 class="pdf-preview-title">PDF Preview</h3>
+              <p class="pdf-preview-subtitle">Your generated report preview is shown below.</p>
+              <div class="pdf-preview-frame-wrap">
+                <div v-if="isPdfPreviewLoading" class="pdf-preview-loading">Generating preview...</div>
+                <iframe
+                  v-else-if="pdfPreviewUrl"
+                  :src="pdfPreviewUrl"
+                  class="pdf-preview-frame"
+                  title="Assessment PDF preview"
+                ></iframe>
+                <div v-else class="pdf-preview-loading">Preview unavailable. Please click Download PDF Report.</div>
+              </div>
+            </div>
           </div>
         </transition>
+      </div>
+    </div>
+
+    <!-- Hidden PDF Report Template -->
+    <div id="pdf-report-template" style="display: none;">
+      <div class="hatters-pdf-wrapper">
+        <div class="pdf-header">
+          <h1 class="pdf-brand">Hatters</h1>
+          <h2 class="pdf-doc-title">Assessment Report</h2>
+          <div class="pdf-header-divider"></div>
+        </div>
+
+        <div class="pdf-meta">
+          <p><strong>Username:</strong> {{ username }}</p>
+          <p v-if="email"><strong>Email:</strong> {{ email }}</p>
+          <p><strong>Date & Time:</strong> {{ new Date().toLocaleString() }}</p>
+        </div>
+
+        <div class="pdf-metrics-box">
+          <div class="pdf-metric">
+            <h3>Assessment Score</h3>
+            <div class="pdf-score-highlight">{{ totalScore }} <span class="pdf-score-max">/ {{ questions.length * 5 }}</span></div>
+          </div>
+          
+          <div class="pdf-metric">
+            <h3>Star Rating</h3>
+            <div class="pdf-stars">
+              <span v-for="n in 5" :key="n" class="pdf-star" :class="{'filled': n <= Math.round(totalScore / questions.length)}">★</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pdf-interpretation-box">
+          <h3>Analysis Result</h3>
+          <p class="pdf-main-interpretation">{{ interpretation }}</p>
+          <p class="pdf-interpretation-note">{{ interpretationNote }}</p>
+        </div>
+
+        <div class="pdf-score-interpretation">
+          <h3>Score interpretation</h3>
+          <table class="pdf-interpretation-table" aria-label="Score interpretation guide">
+            <tbody>
+              <tr v-for="row in scoreInterpretationRows" :key="row.range">
+                <td class="pdf-range-cell">{{ row.range }}</td>
+                <td class="pdf-detail-cell">
+                  <p class="pdf-level-title">{{ row.title }}</p>
+                  <p class="pdf-level-description">{{ row.description }}</p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="pdf-score-interpretation-note">{{ interpretationNote }}</p>
+        </div>
+
+        <div class="pdf-footer">
+          <p>Generated securely by Hatters Assessment Platform</p>
+        </div>
       </div>
     </div>
   </div>
@@ -208,6 +309,11 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import html2pdf from 'html2pdf.js'
+import axios from 'axios'
+
+const runtimeApiBaseUrl = `${window.location.protocol}//${window.location.hostname}:8000`
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || runtimeApiBaseUrl).replace(/\/$/, '')
 
 // Questions Data
 const questions = [
@@ -240,11 +346,17 @@ const tooltipMeaning = {
 // State
 const ratings = ref(Array(questions.length).fill(0))
 const hoverRatings = ref(Array(questions.length).fill(0))
+const username = ref('')
+const email = ref('')
+const isPdfGenerating = ref(false)
+const isPdfPreviewLoading = ref(false)
+const isSuccess = ref(false)
 const submitted = ref(false)
 const isSubmitting = ref(false)
 const scrolled = ref(false)
 const highlightedIndex = ref(-1)
 const questionRefs = ref([])
+const pdfPreviewUrl = ref('')
 
 const STORAGE_KEY = 'premium_attention_assessment'
 
@@ -256,11 +368,35 @@ const totalScore = computed(() => ratings.value.reduce((sum, n) => sum + n, 0))
 
 const interpretation = computed(() => {
   const score = totalScore.value
-  if (score >= 65) return 'Exceptional attention to detail — You demonstrate extraordinary precision and thoroughness in your work.'
-  if (score >= 50) return 'Above-average attention to detail — You consistently notice important details and maintain high quality standards.'
-  if (score >= 35) return 'Average attention to detail — You have a solid foundation with potential for further development.'
-  return 'Below-average attention to detail — Consider implementing structured review processes to enhance your work quality.'
+  if (score >= 65) return 'Exceptional attention to detail. You have a keen eye for specifics and rarely overlook even the minutest details.'
+  if (score >= 50) return 'Above-average attention to detail. You are generally meticulous, but there may be occasional lapses.'
+  if (score >= 35) return "Average attention to detail. While you catch many details, there's room for improvement in certain scenarios."
+  return 'Below-average attention to detail. You might miss out on certain details; consider strategies to enhance your focus and thoroughness.'
 })
+
+const interpretationNote = 'Remember, this quiz provides a general indication and might not capture all nuances of an individual\'s attention to detail. Regular feedback, reflection, and training can help improve this skill over time.'
+const scoreInterpretationRows = [
+  {
+    range: '65-75',
+    title: 'Exceptional attention to detail.',
+    description: 'You have a keen eye for specifics and rarely overlook even the minutest details.'
+  },
+  {
+    range: '50-64',
+    title: 'Above-average attention to detail.',
+    description: 'You are generally meticulous, but there may be occasional lapses.'
+  },
+  {
+    range: '35-49',
+    title: 'Average attention to detail.',
+    description: "While you catch many details, there's room for improvement in certain scenarios."
+  },
+  {
+    range: '15-34',
+    title: 'Below-average attention to detail.',
+    description: 'You might miss out on certain details; consider strategies to enhance your focus and thoroughness.'
+  }
+]
 
 // Core functions
 function setRating(questionIndex, value) {
@@ -288,6 +424,11 @@ async function setRatingAndMaybeAdvance(questionIndex, value) {
 }
 
 async function submitAssessment() {
+  if (!username.value.trim()) {
+    alert('Please enter your Full Name before submitting.')
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    return
+  }
   if (!allAnswered.value) {
     alert(`Please complete all ${questions.length} questions before submitting.`)
     return
@@ -296,59 +437,80 @@ async function submitAssessment() {
   isSubmitting.value = true
   
   try {
-    // 1. Gather the 15 questions and their answers data
-    const assessmentData = {
-      answers: questions.map((question, index) => ({
-        questionId: index + 1,
-        question: question,
-        rating: ratings.value[index],
-        ratingMeaning: tooltipMeaning[ratings.value[index]]
-      })),
-      summary: {
-        totalScore: totalScore.value,
-        maxScore: questions.length * 5,
-        completionPercent: completionPercent.value,
-        interpretation: interpretation.value,
-        submittedAt: new Date().toISOString()
+    const averageRating = Math.round(totalScore.value / questions.length)
+    const payload = {
+      username: username.value,
+      email: email.value || null,
+      score: totalScore.value,
+      rating: averageRating
+    }
+
+    // Axios POST request to backend
+    // Assumes JWT token is stored in localStorage
+    const token = localStorage.getItem('token') || ''
+    const config = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
       }
     }
     
-    // Log the data that would be sent to the database
-    console.log('Data ready to be stored in database:', assessmentData)
-
-    // 2. Send data to your backend/database via API
-    // Replace 'YOUR_API_ENDPOINT_HERE' with your actual database API endpoint
-    /*
-    const response = await fetch('YOUR_API_ENDPOINT_HERE', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(assessmentData)
-    })
-    
-    if (!response.ok) {
-      throw new Error('Failed to save to database')
-    }
-    */
-    
-    // Simulating network delay for realistic feel
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    
-    // Intentionally keep current view unchanged on submit click.
-    // submitted.value = true
+    await axios.post(`${API_BASE_URL}/assessments`, payload, config)
     
     // Clear the draft from local storage since it's now submitted
     localStorage.removeItem(STORAGE_KEY)
     
-    // Optional feedback to let user know it succeeded
-    alert('Assessment data submitted successfully!')
+    // Feedback to let user know it succeeded
+    isSuccess.value = true
+    submitted.value = true
+    await nextTick()
+    await generatePdfPreview()
+    alert('Assessment data submitted successfully! You can now download your PDF report.')
     
   } catch (error) {
-    console.error('Error saving to database:', error)
+    console.error(
+      'Assessment submission failed:',
+      error?.response?.data || error?.message || error
+    )
     alert('There was an error submitting your assessment. Please try again.')
   } finally {
     isSubmitting.value = false
+  }
+}
+
+async function generatePdfPreview() {
+  isPdfPreviewLoading.value = true
+  try {
+    const element = document.getElementById('pdf-report-template')
+    if (!element) return
+
+    element.style.display = 'block'
+
+    const opt = {
+      margin: 0.5,
+      filename: `Hatters_Assessment_Report_${username.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['css', 'legacy'] }
+    }
+
+    const worker = html2pdf().set(opt).from(element).toPdf()
+    const pdf = await worker.get('pdf')
+    const blobUrl = pdf.output('bloburl')
+
+    if (pdfPreviewUrl.value) {
+      URL.revokeObjectURL(pdfPreviewUrl.value)
+    }
+    pdfPreviewUrl.value = blobUrl
+    element.style.display = 'none'
+  } catch (error) {
+    console.error('Error generating PDF preview:', error)
+    if (document.getElementById('pdf-report-template')) {
+      document.getElementById('pdf-report-template').style.display = 'none'
+    }
+  } finally {
+    isPdfPreviewLoading.value = false
   }
 }
 
@@ -356,9 +518,40 @@ function resetAssessment() {
   if (!confirm('Are you sure you want to reset the assessment? All progress will be lost.')) return
   ratings.value = Array(questions.length).fill(0)
   hoverRatings.value = Array(questions.length).fill(0)
+  username.value = ''
+  email.value = ''
   submitted.value = false
+  isSuccess.value = false
   isSubmitting.value = false
   localStorage.removeItem(STORAGE_KEY)
+}
+
+async function generatePDF() {
+  isPdfGenerating.value = true
+  try {
+    const element = document.getElementById('pdf-report-template')
+    element.style.display = 'block'
+    
+    const opt = {
+      margin:       0.5,
+      filename:     `Hatters_Assessment_Report_${username.value.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+      pagebreak:    { mode: ['css', 'legacy'] }
+    }
+    
+    await html2pdf().set(opt).from(element).save()
+    element.style.display = 'none'
+  } catch (error) {
+    console.error('Error generating PDF:', error)
+    alert('Failed to generate PDF. Please try again.')
+    if (document.getElementById('pdf-report-template')) {
+      document.getElementById('pdf-report-template').style.display = 'none'
+    }
+  } finally {
+    isPdfGenerating.value = false
+  }
 }
 
 function printResults() {
@@ -374,7 +567,9 @@ function handleScroll() {
 function saveDraft() {
   if (!submitted.value) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      ratings: ratings.value
+      ratings: ratings.value,
+      username: username.value,
+      email: email.value
     }))
   }
 }
@@ -385,6 +580,8 @@ function loadDraft() {
     try {
       const data = JSON.parse(saved)
       ratings.value = data.ratings || Array(questions.length).fill(0)
+      username.value = data.username || ''
+      email.value = data.email || ''
     } catch (e) {
       console.error('Failed to load draft', e)
     }
@@ -392,7 +589,7 @@ function loadDraft() {
 }
 
 // Auto-save
-watch([ratings], () => {
+watch([ratings, username, email], () => {
   saveDraft()
 }, { deep: true })
 
@@ -403,6 +600,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (pdfPreviewUrl.value) {
+    URL.revokeObjectURL(pdfPreviewUrl.value)
+  }
 })
 </script>
 
@@ -895,6 +1095,50 @@ onUnmounted(() => {
   margin-top: 1rem;
 }
 
+.pdf-preview-panel {
+  margin-top: 1.2rem;
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  border-radius: 0.9rem;
+  padding: 0.9rem;
+}
+
+.pdf-preview-title {
+  font-size: 1rem;
+  color: #1e3a8a;
+  margin-bottom: 0.2rem;
+}
+
+.pdf-preview-subtitle {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.7rem;
+}
+
+.pdf-preview-frame-wrap {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.7rem;
+  overflow: hidden;
+  min-height: 420px;
+  background: #f8fafc;
+}
+
+.pdf-preview-frame {
+  width: 100%;
+  height: 420px;
+  border: 0;
+  background: #ffffff;
+}
+
+.pdf-preview-loading {
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #475569;
+  font-weight: 600;
+}
+
 .btn-outline {
   border: 1px solid rgba(156, 230, 233, 0.38);
   background: rgba(8, 43, 86, 0.32);
@@ -1086,6 +1330,267 @@ onUnmounted(() => {
   }
 }
 
+/* User Info Section */
+.user-info-section {
+  padding: 1.5rem 3rem;
+  margin: 0 1rem 1rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  border-radius: 1rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9ce8ee;
+  letter-spacing: 0.02em;
+}
+
+.input-group .required {
+  color: #ff6b6b;
+}
+
+.input-group .optional {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.premium-input {
+  background: rgba(4, 20, 48, 0.6);
+  border: 1px solid rgba(156, 230, 233, 0.2);
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.premium-input:focus {
+  border-color: #9ce8ee;
+  box-shadow: 0 0 0 3px rgba(156, 230, 233, 0.15);
+}
+
+.premium-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.success-btn {
+  background: #006D77;
+}
+
+.success-btn:hover {
+  background: #00818a;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+/* PDF Template Styles */
+.hatters-pdf-wrapper {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  padding: 24px 28px;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+.pdf-header {
+  text-align: center;
+  margin-bottom: 14px;
+}
+.pdf-brand {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 0 0 10px 0;
+}
+.pdf-doc-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.pdf-header-divider {
+  width: 60px;
+  height: 3px;
+  background: #3b82f6;
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+.pdf-meta {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-left: 4px solid #3b82f6;
+  border-radius: 0 8px 8px 0;
+}
+.pdf-meta p {
+  margin: 4px 0;
+  font-size: 11px;
+  color: #374151;
+}
+.pdf-meta strong {
+  color: #111827;
+  display: inline-block;
+  width: 76px;
+}
+.pdf-metrics-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pdf-metric {
+  flex: 1;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  background: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+.pdf-metric h3 {
+  margin: 0 0 8px 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #6b7280;
+  letter-spacing: 1px;
+}
+.pdf-score-highlight {
+  font-size: 26px;
+  font-weight: 800;
+  color: #3b82f6;
+  line-height: 1;
+}
+.pdf-score-max {
+  font-size: 14px;
+  color: #9ca3af;
+  font-weight: 500;
+}
+.pdf-stars {
+  font-size: 20px;
+  line-height: 1.5;
+}
+.pdf-star {
+  color: #e5e7eb;
+}
+.pdf-star.filled {
+  color: #fbbf24;
+}
+.pdf-interpretation-box {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 10px;
+  margin-bottom: 8px;
+}
+.pdf-interpretation-box h3 {
+  font-size: 13px;
+  color: #111827;
+  margin: 0 0 10px 0;
+}
+.pdf-interpretation-box p {
+  font-size: 10.5px;
+  line-height: 1.35;
+  color: #4b5563;
+  margin: 0;
+}
+
+.pdf-main-interpretation {
+  font-size: 12px !important;
+  font-weight: 700;
+  color: #111827 !important;
+  line-height: 1.45;
+}
+
+.interpretation-note {
+  margin-top: 0.65rem;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.pdf-interpretation-note {
+  margin-top: 5px !important;
+  font-size: 10px !important;
+  color: #6b7280 !important;
+}
+
+.pdf-score-interpretation {
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.pdf-score-interpretation h3 {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+  margin: 0 0 6px 0;
+}
+
+.pdf-interpretation-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #c8b85f;
+}
+
+.pdf-interpretation-table tr:not(:last-child) {
+  border-bottom: 1px solid #c8b85f;
+}
+
+.pdf-range-cell {
+  width: 56px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #111827;
+  text-align: center;
+  vertical-align: middle;
+  border-right: 1px solid #c8b85f;
+  padding: 7px 6px;
+}
+
+.pdf-detail-cell {
+  padding: 7px 8px;
+}
+
+.pdf-level-title {
+  margin: 0 0 2px 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.pdf-level-description {
+  margin: 0;
+  font-size: 10px;
+  color: #1f2937;
+  line-height: 1.3;
+}
+
+.pdf-score-interpretation-note {
+  margin-top: 6px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: #111827;
+}
+.pdf-footer {
+  text-align: center;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 9px;
+  color: #9ca3af;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .question-item,
   .rating-btn,
@@ -1094,5 +1599,4 @@ onUnmounted(() => {
     transition: none !important;
   }
 }
-
 </style>
