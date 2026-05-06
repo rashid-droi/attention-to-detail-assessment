@@ -109,7 +109,7 @@
             </p>
           </div>
           <div class="action-buttons">
-            <button class="btn-primary" :class="{ 'loading': isSubmitting }" :disabled="!allAnswered || isSubmitting"
+            <button class="btn-primary" :class="{ 'loading': isSubmitting }" :disabled="isSubmitting"
               @click="submitAssessment">
               <span v-if="!isSubmitting">
                 Complete Assessment
@@ -288,8 +288,68 @@ async function setRatingAndMaybeAdvance(questionIndex, value) {
 }
 
 async function submitAssessment() {
-  // Intentionally keep current view unchanged on submit click.
-  return
+  if (!allAnswered.value) {
+    alert(`Please complete all ${questions.length} questions before submitting.`)
+    return
+  }
+  
+  isSubmitting.value = true
+  
+  try {
+    // 1. Gather the 15 questions and their answers data
+    const assessmentData = {
+      answers: questions.map((question, index) => ({
+        questionId: index + 1,
+        question: question,
+        rating: ratings.value[index],
+        ratingMeaning: tooltipMeaning[ratings.value[index]]
+      })),
+      summary: {
+        totalScore: totalScore.value,
+        maxScore: questions.length * 5,
+        completionPercent: completionPercent.value,
+        interpretation: interpretation.value,
+        submittedAt: new Date().toISOString()
+      }
+    }
+    
+    // Log the data that would be sent to the database
+    console.log('Data ready to be stored in database:', assessmentData)
+
+    // 2. Send data to your backend/database via API
+    // Replace 'YOUR_API_ENDPOINT_HERE' with your actual database API endpoint
+    /*
+    const response = await fetch('YOUR_API_ENDPOINT_HERE', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(assessmentData)
+    })
+    
+    if (!response.ok) {
+      throw new Error('Failed to save to database')
+    }
+    */
+    
+    // Simulating network delay for realistic feel
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    // Intentionally keep current view unchanged on submit click.
+    // submitted.value = true
+    
+    // Clear the draft from local storage since it's now submitted
+    localStorage.removeItem(STORAGE_KEY)
+    
+    // Optional feedback to let user know it succeeded
+    alert('Assessment data submitted successfully!')
+    
+  } catch (error) {
+    console.error('Error saving to database:', error)
+    alert('There was an error submitting your assessment. Please try again.')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 function resetAssessment() {
