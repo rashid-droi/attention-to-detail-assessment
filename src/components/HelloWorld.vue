@@ -24,12 +24,7 @@
     <div class="container gf-container">
       <div class="assessment-card glass-card gf-sheet">
         <!-- Title block (form header) -->
-        <header
-          class="gf-title-block"
-          data-aos="fade-down"
-          data-aos-duration="680"
-          :data-aos-easing="AOS_EASING"
-        >
+        <header class="gf-title-block">
           <p class="gf-form-type">Self-assessment · Hatters</p>
           <h1 class="gf-main-title">
             Attention to Detail
@@ -47,13 +42,7 @@
         <div class="gf-divider" aria-hidden="true" />
 
         <!-- User Information Section -->
-        <div
-          class="user-info-section gf-form-section"
-          data-aos="fade-up"
-          data-aos-delay="50"
-          data-aos-duration="700"
-          :data-aos-easing="AOS_EASING"
-        >
+        <div class="user-info-section gf-form-section">
           <h2 class="gf-section-title">Your details</h2>
           <div class="input-group">
             <label for="username">Full Name <span class="required">*</span></label>
@@ -68,14 +57,7 @@
         <div class="gf-divider" aria-hidden="true" />
 
         <!-- Answer scale reference (multiple choice legend) -->
-        <section
-          class="mcq-instructions-panel gf-form-section"
-          aria-labelledby="mcq-instructions-heading"
-          data-aos="fade-up"
-          data-aos-delay="80"
-          data-aos-duration="700"
-          :data-aos-easing="AOS_EASING"
-        >
+        <section class="mcq-instructions-panel gf-form-section" aria-labelledby="mcq-instructions-heading">
           <h2 id="mcq-instructions-heading" class="mcq-instructions-title gf-section-title">How this scale works</h2>
           <p class="mcq-instructions-lead">
             Each question lists these five choices. Tap or click one option—the column of dots counts points on the scale (one dot&nbsp;=&nbsp;1 point, up to five); the wording describes how often it applies to you.
@@ -101,12 +83,7 @@
             class="question-item gf-form-section gf-question-card"
             :class="{ 'answered': ratings[qIndex] > 0, 'highlighted': highlightedIndex === qIndex }"
             :style="{ '--gf-q-index': qIndex }"
-            :ref="el => { if (el) questionRefs[qIndex] = el }"
-            data-aos="fade-up"
-            :data-aos-delay="aosDelayPerQuestion(qIndex)"
-            data-aos-duration="650"
-            :data-aos-easing="AOS_EASING"
-          >
+            :ref="el => { if (el) questionRefs[qIndex] = el }">
             <div class="gf-question-head">
               <span class="gf-question-num-tile" aria-hidden="true">{{ String(qIndex + 1).padStart(2, '0') }}</span>
               <p class="gf-question-line" :id="'question-text-' + qIndex">
@@ -161,14 +138,7 @@
         </ol>
 
         <!-- Submit row -->
-        <div
-          v-if="!submitted"
-          class="submission-section gf-submit-band"
-          data-aos="fade-up"
-          data-aos-delay="100"
-          data-aos-duration="700"
-          :data-aos-easing="AOS_EASING"
-        >
+        <div v-if="!submitted" class="submission-section gf-submit-band">
           <div class="submission-copy">
             <p class="submission-title">Submit</p>
             <p class="submission-note">
@@ -213,23 +183,12 @@
         <!-- Premium Results Panel -->
         <transition name="result-appear">
           <div v-if="submitted" class="results-panel gf-results-sheet">
-            <div
-              class="results-header gf-results-header"
-              data-aos="fade-down"
-              data-aos-duration="640"
-              :data-aos-easing="AOS_EASING"
-            >
+            <div class="results-header gf-results-header">
               <h2>Assessment Complete</h2>
               <p class="results-subtitle">Attention to Detail Assessment Results</p>
             </div>
 
-            <div
-              class="score-section"
-              data-aos="fade-up"
-              data-aos-delay="60"
-              data-aos-duration="680"
-              :data-aos-easing="AOS_EASING"
-            >
+            <div class="score-section">
               <div class="score-headline" aria-live="polite">
                 <span class="score-number">{{ totalScore }}</span>
                 <span class="score-max">/ 75</span>
@@ -247,13 +206,7 @@
               </div>
             </div>
 
-            <div
-              class="interpretation-card"
-              data-aos="fade-up"
-              data-aos-delay="100"
-              data-aos-duration="680"
-              :data-aos-easing="AOS_EASING"
-            >
+            <div class="interpretation-card">
               <div class="interpretation-badge">Analysis Result</div>
               <p class="interpretation-text">{{ interpretation }}</p>
               <p class="interpretation-note">{{ interpretationNote }}</p>
@@ -264,13 +217,7 @@
               </div>
             </div>
 
-            <div
-              class="results-actions"
-              data-aos="fade-up"
-              data-aos-delay="140"
-              data-aos-duration="650"
-              :data-aos-easing="AOS_EASING"
-            >
+            <div class="results-actions">
               <button class="btn-outline" @click="resetAssessment">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
@@ -295,14 +242,7 @@
               </button>
             </div>
 
-            <div
-              class="pdf-preview-panel"
-              v-if="isSuccess"
-              data-aos="zoom-in"
-              data-aos-delay="80"
-              data-aos-duration="720"
-              :data-aos-easing="AOS_EASING"
-            >
+            <div class="pdf-preview-panel" v-if="isSuccess">
               <h3 class="pdf-preview-title">PDF Preview</h3>
               <p class="pdf-preview-subtitle">Your generated report preview is shown below.</p>
               <div class="pdf-preview-frame-wrap">
@@ -382,27 +322,8 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import AOS from 'aos'
 import html2pdf from 'html2pdf.js'
 import axios from 'axios'
-
-const AOS_EASING = 'ease-out-cubic'
-
-function aosShouldDisable() {
-  return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-}
-
-function aosDelayPerQuestion(qIndex, step = 32, base = 64, max = 420) {
-  return Math.min(base + qIndex * step, max)
-}
-
-function refreshAos() {
-  nextTick(() => {
-    requestAnimationFrame(() => {
-      AOS.refresh()
-    })
-  })
-}
 
 // Prefer VITE_API_BASE_URL=http://HOST:PORT. Else use VITE_API_PORT (defaults to 8000).
 const runtimeApiBaseUrl = `${window.location.protocol}//${window.location.hostname}:${import.meta.env.VITE_API_PORT ?? '8000'}`
@@ -699,25 +620,8 @@ watch([ratings, username, email], () => {
   saveDraft()
 }, { deep: true })
 
-watch(submitted, () => {
-  refreshAos()
-})
-
-watch(isSuccess, () => {
-  refreshAos()
-})
-
 onMounted(() => {
   loadDraft()
-  AOS.init({
-    duration: 720,
-    easing: AOS_EASING,
-    once: true,
-    offset: 48,
-    anchorPlacement: 'top-bottom',
-    disable: aosShouldDisable()
-  })
-  refreshAos()
   window.addEventListener('scroll', handleScroll)
 })
 
@@ -2082,6 +1986,17 @@ onUnmounted(() => {
   -webkit-font-smoothing: antialiased;
 }
 
+@keyframes gf-fade-shift {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes gf-sheet-rise {
   from {
     opacity: 0;
@@ -2207,6 +2122,26 @@ onUnmounted(() => {
   padding: clamp(1.2rem, 3.2vw, 1.75rem) clamp(1.05rem, 3vw, 1.65rem);
 }
 
+.gf-forms .gf-title-block > * {
+  animation: gf-fade-shift 0.48s var(--gf-motion-ease-out) backwards;
+}
+
+.gf-forms .gf-title-block > *:nth-child(1) {
+  animation-delay: 0.05s;
+}
+
+.gf-forms .gf-title-block > *:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.gf-forms .gf-title-block > *:nth-child(3) {
+  animation-delay: 0.15s;
+}
+
+.gf-forms .gf-title-block > *:nth-child(4) {
+  animation-delay: 0.19s;
+}
+
 @keyframes gf-title-highlight-sheen {
   0%,
   100% {
@@ -2304,6 +2239,8 @@ onUnmounted(() => {
   border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
+  animation: gf-fade-shift 0.52s var(--gf-motion-ease-out) backwards;
+  animation-delay: calc(var(--gf-stagger-base) + var(--gf-stagger-step));
 }
 
 .gf-forms .input-group label {
@@ -2369,6 +2306,8 @@ onUnmounted(() => {
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
+  animation: gf-fade-shift 0.52s var(--gf-motion-ease-out) backwards;
+  animation-delay: calc(var(--gf-stagger-base) + 2 * var(--gf-stagger-step));
 }
 
 .gf-forms .mcq-instructions-panel::before {
@@ -2415,6 +2354,10 @@ onUnmounted(() => {
   border-radius: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
+  animation: gf-fade-shift 0.48s var(--gf-motion-ease-out) backwards;
+  animation-delay: calc(
+    var(--gf-stagger-base) + 3 * var(--gf-stagger-step) + var(--gf-q-index, 0) * var(--gf-stagger-step)
+  );
   transition:
     background-color 0.35s var(--gf-motion-ease-out),
     box-shadow 0.35s ease;
@@ -2748,6 +2691,8 @@ onUnmounted(() => {
   border-radius: 0 !important;
   background: #fafcfc !important;
   box-shadow: none !important;
+  animation: gf-fade-shift 0.48s var(--gf-motion-ease-out) backwards;
+  animation-delay: calc(var(--gf-stagger-base) + 3 * var(--gf-stagger-step) + 15 * var(--gf-stagger-step) + 0.12s);
 }
 
 .gf-forms .submission-copy {
@@ -2917,7 +2862,12 @@ onUnmounted(() => {
   }
 
   .gf-forms .gf-sheet.assessment-card,
-  .gf-sticky-progress {
+  .gf-sticky-progress,
+  .gf-forms .gf-title-block > *,
+  .gf-forms .user-info-section,
+  .gf-forms .mcq-instructions-panel,
+  .gf-forms .questions-section .question-item.gf-question-card,
+  .gf-forms .submission-section.gf-submit-band {
     animation: none !important;
   }
 
@@ -2947,19 +2897,6 @@ onUnmounted(() => {
   .result-appear-enter-active,
   .result-appear-leave-active {
     transition: none !important;
-  }
-}
-</style>
-
-<style>
-/* AOS: ensure content stays readable when prefers-reduced-motion (library init may still run briefly) */
-@media (prefers-reduced-motion: reduce) {
-  .gf-forms [data-aos],
-  .gf-forms [data-aos].aos-animate {
-    opacity: 1 !important;
-    transform: none !important;
-    transition: none !important;
-    filter: none !important;
   }
 }
 </style>
