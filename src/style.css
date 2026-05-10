@@ -1,12 +1,13 @@
 :root {
+  /* Align with assessment brand (Select / teal–navy–yellow), used lightly app-wide */
   --text: #6b6375;
-  --text-h: #08060d;
+  --text-h: #002b5c;
   --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
+  --border: #e2e8e8;
+  --code-bg: #f4faf9;
+  --accent: #008b8b;
+  --accent-bg: rgba(0, 139, 139, 0.1);
+  --accent-border: rgba(0, 139, 139, 0.45);
   --social-bg: rgba(244, 243, 236, 0.5);
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
@@ -33,13 +34,13 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --text: #9ca3af;
-    --text-h: #f3f4f6;
+    --text-h: #e8f4f3;
     --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
+    --border: #2e3a3a;
+    --code-bg: #1a2224;
+    --accent: #5eead4;
+    --accent-bg: rgba(94, 234, 212, 0.12);
+    --accent-border: rgba(94, 234, 212, 0.45);
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow:
       rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
@@ -54,10 +55,12 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 12% 90%, #ffdb09 0%, #ffdb09 11%, transparent 35%),
-    radial-gradient(circle at 28% 75%, rgba(95, 176, 74, 0.95) 0%, rgba(95, 176, 74, 0.95) 16%, transparent 45%),
-    radial-gradient(circle at 55% 20%, rgba(24, 200, 182, 0.95) 0%, rgba(24, 200, 182, 0.95) 20%, transparent 50%),
-    linear-gradient(120deg, #102161 0%, #0d8f9e 48%, #04315f 100%);
+    radial-gradient(ellipse 76% 62% at 94% 6%, rgba(0, 139, 139, 0.12) 0%, transparent 48%),
+    radial-gradient(ellipse 66% 52% at 82% 44%, rgba(0, 168, 168, 0.11) 0%, transparent 52%),
+    radial-gradient(ellipse 72% 58% at 0% 100%, rgba(240, 228, 0, 0.17) 0%, transparent 50%),
+    radial-gradient(ellipse 66% 50% at 0% 0%, rgba(0, 43, 92, 0.058) 0%, transparent 45%),
+    radial-gradient(ellipse 70% 55% at 50% -10%, rgba(154, 205, 50, 0.08) 0%, transparent 46%),
+    linear-gradient(165deg, #f8fafc 0%, #f0faf9 42%, #fafaf6 74%, #fefce8 100%);
   background-attachment: fixed;
 }
 

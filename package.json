@@ -10,6 +10,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "aos": "^2.3.4",
     "axios": "^1.16.0",
     "html2pdf.js": "^0.14.0",
     "vue": "^3.5.32",
