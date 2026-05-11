@@ -60,19 +60,8 @@
         <section class="mcq-instructions-panel gf-form-section" aria-labelledby="mcq-instructions-heading">
           <h2 id="mcq-instructions-heading" class="mcq-instructions-title gf-section-title">How this scale works</h2>
           <p class="mcq-instructions-lead">
-            Each question lists these five choices. Tap or click one option—the column of dots counts points on the scale (one dot&nbsp;=&nbsp;1 point, up to five); the wording describes how often it applies to you.
+            Each question lists five choices. Tap or click one row—the left badge shows points (1–5); the label describes how often it applies to you.
           </p>
-          <dl class="mcq-scale-reference">
-            <template v-for="val in SCALE_VALUES" :key="val">
-              <dt class="mcq-scale-points">
-                <span class="sr-only">{{ pointsLabel(val) }}</span>
-                <span class="mcq-dots" aria-hidden="true">
-                  <span v-for="n in val" :key="n" class="mcq-dot" />
-                </span>
-              </dt>
-              <dd class="mcq-scale-label">{{ tooltipMeaning[val] }}</dd>
-            </template>
-          </dl>
         </section>
 
         <div class="gf-divider gf-divider--muted" aria-hidden="true" />
@@ -122,11 +111,7 @@
                   <span class="gf-radio-face" aria-hidden="true" />
                   <span class="mcq-option-card gf-option-body">
                     <span class="sr-only">{{ pointsLabel(value) }}.</span>
-                    <span class="mcq-option-points" aria-hidden="true">
-                      <span class="mcq-dots">
-                        <span v-for="n in value" :key="n" class="mcq-dot" />
-                      </span>
-                    </span>
+                    <span class="mcq-option-score-badge" aria-hidden="true">{{ value }} pt{{ value === 1 ? '' : 's' }}</span>
                     <span class="mcq-option-caption">{{ tooltipMeaning[value] }}</span>
                   </span>
                 </label>
@@ -154,10 +139,8 @@
                   <path d="M5 12h14M13 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </span>
-              <span v-else>
-                <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
-                </svg>
+              <span v-else class="gf-loading-row">
+                <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
                 Processing...
               </span>
             </button>
@@ -170,10 +153,8 @@
                 </svg>
                 Download PDF Report
               </span>
-              <span v-else>
-                <svg class="spinner" width="20" height="20" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
-                </svg>
+              <span v-else class="gf-loading-row">
+                <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
                 Generating PDF...
               </span>
             </button>
@@ -219,9 +200,11 @@
 
             <div class="results-actions">
               <button class="btn-outline" @click="resetAssessment">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                  <circle cx="12" cy="12" r="3" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                  <path d="M3 21v-5h5" />
                 </svg>
                 New Assessment
               </button>
@@ -233,10 +216,8 @@
                   </svg>
                   Download PDF
                 </span>
-                <span v-else>
-                  <svg class="spinner" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="31.4 31.4" />
-                  </svg>
+                <span v-else class="gf-loading-row">
+                  <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
                   Generating PDF...
                 </span>
               </button>
@@ -1003,46 +984,6 @@ onUnmounted(() => {
   color: var(--text-soft);
 }
 
-.mcq-scale-reference {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 0.45rem 1.25rem;
-  margin: 0.9rem 0 0;
-  align-items: center;
-}
-
-.mcq-scale-points {
-  margin: 0;
-  min-width: 4.75rem;
-}
-
-.mcq-dots {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.mcq-dot {
-  width: 0.52rem;
-  height: 0.52rem;
-  border-radius: 50%;
-  background: var(--brand-teal);
-  flex-shrink: 0;
-  box-shadow: 0 0 0 1px rgba(0, 43, 92, 0.12);
-}
-
-.mcq-scale-points .mcq-dot {
-  width: 0.56rem;
-  height: 0.56rem;
-}
-
-.mcq-scale-label {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -1160,10 +1101,19 @@ onUnmounted(() => {
     0 2px 10px rgba(0, 43, 92, 0.08);
 }
 
-.mcq-option-points {
-  min-width: 4.75rem;
-  display: flex;
-  align-items: center;
+.mcq-option-score-badge {
+  flex-shrink: 0;
+  min-width: 3.25rem;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-align: center;
+  color: var(--brand-navy);
+  background: rgba(0, 168, 168, 0.12);
+  border: 1px solid rgba(0, 139, 139, 0.28);
+  border-radius: 6px;
 }
 
 .mcq-option-caption {
@@ -1176,9 +1126,10 @@ onUnmounted(() => {
   color: var(--brand-navy);
 }
 
-.mcq-option--selected .mcq-dot {
-  background: var(--brand-navy);
-  box-shadow: 0 0 0 1px rgba(0, 168, 168, 0.35);
+.mcq-option--selected .mcq-option-score-badge {
+  color: #fff;
+  background: linear-gradient(145deg, var(--brand-cyan), var(--brand-teal) 55%, var(--brand-navy));
+  border-color: rgba(0, 43, 92, 0.2);
 }
 
 .submission-section {
@@ -1312,17 +1263,31 @@ onUnmounted(() => {
   color: var(--brand-navy);
   margin-bottom: 0.65rem;
   padding: 0.25rem 0.65rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: rgba(212, 245, 243, 0.75);
   border: 1px solid rgba(0, 139, 139, 0.22);
 }
 
 .interpretation-text {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.58;
+  margin: 0 0 0.85rem;
+  padding: 1.05rem 1.15rem 1.1rem 1.2rem;
+  font-size: 1.02rem;
+  line-height: 1.65;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--brand-navy);
+  letter-spacing: -0.01em;
+  background: linear-gradient(
+    145deg,
+    rgba(212, 245, 243, 0.58) 0%,
+    rgba(255, 255, 255, 0.98) 45%,
+    rgba(232, 248, 252, 0.72) 100%
+  );
+  border: 1px solid rgba(0, 139, 139, 0.22);
+  border-left: 4px solid var(--brand-teal);
+  border-radius: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    0 4px 20px rgba(0, 43, 92, 0.07);
 }
 
 .interpretation-bars {
@@ -1330,7 +1295,7 @@ onUnmounted(() => {
   gap: 0.35rem;
   margin-top: 0.85rem;
   height: 6px;
-  border-radius: 999px;
+  border-radius: 3px;
   overflow: hidden;
   background: rgba(15, 23, 42, 0.06);
 }
@@ -1482,13 +1447,46 @@ onUnmounted(() => {
   transform: translateY(-1px);
 }
 
-.spinner {
-  animation: spin 0.85s linear infinite;
+.gf-loading-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+.gf-loading-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 1rem;
+}
+
+.gf-loading-bars > span {
+  display: block;
+  width: 4px;
+  height: 10px;
+  border-radius: 1px;
+  background: currentColor;
+  transform-origin: center bottom;
+  animation: gf-loading-bar 0.75s ease-in-out infinite;
+}
+
+.gf-loading-bars > span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.gf-loading-bars > span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+@keyframes gf-loading-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
   }
 }
 
@@ -1634,10 +1632,6 @@ onUnmounted(() => {
     padding: 0.95rem 0.85rem;
   }
 
-  .mcq-scale-reference {
-    gap: 0.35rem 0.85rem;
-  }
-
   .questions-section {
     padding: 1rem 0.85rem 0.3rem;
   }
@@ -1659,22 +1653,9 @@ onUnmounted(() => {
     padding: 0.55rem 0.72rem;
   }
 
-  .mcq-option-points {
-    min-width: 4.25rem;
-  }
-
-  .mcq-dots {
-    gap: 0.24rem;
-  }
-
-  .mcq-dot {
-    width: 0.46rem;
-    height: 0.46rem;
-  }
-
-  .mcq-scale-points .mcq-dot {
-    width: 0.5rem;
-    height: 0.5rem;
+  .mcq-option-score-badge {
+    min-width: 3rem;
+    font-size: 0.68rem;
   }
 
   .submission-section {
@@ -2068,7 +2049,7 @@ onUnmounted(() => {
 
 .gf-sticky-progress-track {
   height: 4px;
-  border-radius: 999px;
+  border-radius: 2px;
   overflow: hidden;
   background: rgba(0, 43, 92, 0.09);
 }
@@ -2319,28 +2300,6 @@ onUnmounted(() => {
   line-height: 1.58 !important;
 }
 
-.gf-forms .mcq-scale-reference {
-  margin-top: 0.65rem;
-  padding: 0.75rem 0.9rem;
-  background: #f8faf9;
-  border: 1px solid #eceff1;
-  border-radius: var(--gf-radius-sm);
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.3s var(--gf-motion-ease-out);
-}
-
-.gf-forms .mcq-instructions-panel:hover .mcq-scale-reference {
-  border-color: rgba(0, 139, 139, 0.22);
-  box-shadow: 0 2px 10px rgba(0, 43, 92, 0.05);
-}
-
-.gf-forms .mcq-scale-label {
-  font-size: 0.8125rem !important;
-  font-weight: 500 !important;
-  line-height: 1.45;
-}
-
 .gf-forms .questions-section {
   gap: 0 !important;
   padding: 0 !important;
@@ -2455,7 +2414,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 6px;
   color: var(--brand-teal);
   background: rgba(0, 139, 139, 0.1);
   will-change: transform, opacity;
@@ -2530,7 +2489,7 @@ onUnmounted(() => {
   transform: translateX(3px);
 }
 
-/* Invisible input covers the entire row so dots, text, and whitespace are all clickable */
+/* Invisible input covers the entire row so badge, text, and whitespace are all clickable */
 .gf-forms .mcq-radio-native.gf-radio.gf-radio-hit {
   position: absolute !important;
   inset: 0 !important;
@@ -2556,15 +2515,15 @@ onUnmounted(() => {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 22px;
-  height: 22px;
-  margin-top: 0.38rem;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: 0.4rem;
+  border-radius: 5px;
   pointer-events: none;
   background: #ffffff;
   box-shadow:
-    inset 0 0 0 1px rgba(0, 43, 92, 0.08),
-    0 0 0 2px rgba(0, 139, 139, 0.5);
+    inset 0 0 0 1px rgba(0, 43, 92, 0.1),
+    0 0 0 2px rgba(0, 139, 139, 0.45);
   transform: scale(1);
   transition:
     box-shadow 0.2s var(--gf-motion-ease-out),
@@ -2574,7 +2533,7 @@ onUnmounted(() => {
 
 .gf-forms .gf-radio-hit:checked ~ .gf-radio-face {
   box-shadow:
-    inset 0 0 0 1px rgba(0, 43, 92, 0.1),
+    inset 0 0 0 1px rgba(0, 43, 92, 0.12),
     0 0 0 2px var(--brand-teal);
   transform: scale(1.04);
 }
@@ -2584,13 +2543,13 @@ onUnmounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
   background: linear-gradient(145deg, var(--brand-cyan), var(--brand-teal) 55%, var(--brand-navy));
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.65);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.55);
   opacity: 0;
-  transform: translate(-50%, -50%) scale(0.35);
+  transform: translate(-50%, -50%) scale(0.5);
   transition:
     opacity 0.18s ease,
     transform 0.3s var(--gf-motion-spring);
@@ -2640,23 +2599,21 @@ onUnmounted(() => {
     box-shadow 0.22s ease;
 }
 
-/* Scale dots: white “points” with brand ring (stays readable on hover rows) */
-.gf-forms .gf-option-row .mcq-option-points .mcq-dot {
-  background: #ffffff !important;
-  box-shadow:
-    0 0 0 1.5px var(--brand-teal),
-    0 1px 3px rgba(0, 43, 92, 0.06) !important;
-  transform: scale(1);
+.gf-forms .mcq-option-card .mcq-option-score-badge {
+  background: rgba(248, 252, 251, 0.95);
+  border-color: rgba(0, 139, 139, 0.22);
   transition:
-    box-shadow 0.24s var(--gf-motion-ease-out),
-    transform 0.26s var(--gf-motion-spring);
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.22s var(--gf-motion-spring);
 }
 
-.gf-forms .gf-radio-hit:checked ~ .mcq-option-card .mcq-dot {
-  box-shadow:
-    0 0 0 2px var(--brand-navy),
-    inset 0 0 0 1px rgba(0, 139, 139, 0.2) !important;
-  transform: scale(1.08);
+.gf-forms .gf-radio-hit:checked ~ .mcq-option-card .mcq-option-score-badge {
+  color: #fff !important;
+  background: linear-gradient(145deg, var(--brand-cyan), var(--brand-teal) 55%, var(--brand-navy)) !important;
+  border-color: rgba(0, 43, 92, 0.25) !important;
+  transform: scale(1.02);
 }
 
 .gf-forms .gf-option-row:hover .mcq-option-card {
@@ -2883,8 +2840,12 @@ onUnmounted(() => {
 
   .gf-forms .gf-radio-face,
   .gf-forms .gf-radio-face::after,
-  .gf-forms .gf-option-row .mcq-option-points .mcq-dot {
+  .gf-forms .mcq-option-card .mcq-option-score-badge {
     transition: none !important;
+  }
+
+  .gf-loading-bars > span {
+    animation: none !important;
   }
 
   .gf-forms .gf-submit-btn.btn-primary:not(:disabled):hover,
