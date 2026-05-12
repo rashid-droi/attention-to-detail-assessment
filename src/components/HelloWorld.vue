@@ -25,7 +25,6 @@
       <div class="assessment-card glass-card gf-sheet">
         <!-- Title block (form header) -->
         <header class="gf-title-block">
-          <p class="gf-form-type">Self-assessment · Hatters</p>
           <h1 class="gf-main-title">
             Attention to Detail
             <span class="title-highlight">Assessment</span>
@@ -33,9 +32,6 @@
           <p class="gf-description">
             Evaluate your meticulousness and precision through this assessment.
             Each statement reflects real-world scenarios that measure your attention to detail.
-          </p>
-          <p class="gf-helper">
-            For each required question, choose <strong>exactly one</strong> answer. The same response scale applies to all {{ questions.length }} statements.
           </p>
         </header>
 
@@ -1440,14 +1436,6 @@ onUnmounted(() => {
   animation-delay: 0.1s;
 }
 
-.gf-forms .gf-title-block > *:nth-child(3) {
-  animation-delay: 0.15s;
-}
-
-.gf-forms .gf-title-block > *:nth-child(4) {
-  animation-delay: 0.19s;
-}
-
 @keyframes gf-title-highlight-sheen {
   0%,
   100% {
@@ -1456,15 +1444,6 @@ onUnmounted(() => {
   50% {
     background-position: 100% 50%;
   }
-}
-
-.gf-form-type {
-  margin: 0 0 0.4rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--gf-muted-ink);
 }
 
 .gf-forms .gf-main-title {
@@ -1500,19 +1479,6 @@ onUnmounted(() => {
   line-height: 1.55;
   color: var(--gf-muted-ink);
   max-width: none;
-}
-
-.gf-helper {
-  margin: 0.65rem 0 0;
-  font-size: 0.8125rem;
-  line-height: 1.55;
-  color: var(--gf-muted-ink);
-  max-width: none;
-}
-
-.gf-helper strong {
-  color: var(--gf-ink);
-  font-weight: 600;
 }
 
 .gf-divider {

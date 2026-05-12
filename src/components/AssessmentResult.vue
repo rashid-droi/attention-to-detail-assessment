@@ -1,5 +1,5 @@
 <template>
-  <div class="assessment-app gf-forms">
+  <div class="assessment-app gf-forms" id="assessment-result-top" tabindex="-1">
     <div class="animated-bg" aria-hidden="true">
       <div class="bg-gradient"></div>
       <div class="noise-overlay"></div>
@@ -10,7 +10,6 @@
         <div v-if="result" class="results-panel gf-results-sheet">
           <div class="results-header gf-results-header">
             <h2>Assessment Complete</h2>
-            <p class="results-subtitle">Attention to Detail Assessment Results</p>
           </div>
 
           <div class="score-section">
@@ -75,7 +74,6 @@
 
           <div class="pdf-preview-panel">
             <h3 class="pdf-preview-title">PDF Preview</h3>
-            <p class="pdf-preview-subtitle">Your generated report preview is shown below.</p>
             <div class="pdf-preview-frame-wrap">
               <div v-if="isPdfPreviewLoading" class="pdf-preview-loading">Generating preview...</div>
               <iframe
@@ -94,8 +92,7 @@
     <div v-if="result" id="pdf-report-template" style="display: none">
       <div class="hatters-pdf-wrapper">
         <div class="pdf-header">
-          <h1 class="pdf-brand">Hatters</h1>
-          <h2 class="pdf-doc-title">Assessment Report</h2>
+          <h1 class="pdf-brand">Assessment Complete</h1>
           <div class="pdf-header-divider"></div>
         </div>
 
@@ -107,14 +104,14 @@
 
         <div class="pdf-metrics-box">
           <div class="pdf-metric">
-            <h3>Assessment Score</h3>
+            <h3>Score</h3>
             <div class="pdf-score-highlight">
               {{ result.totalScore }} <span class="pdf-score-max">/ {{ maxScore }}</span>
             </div>
           </div>
 
           <div class="pdf-metric">
-            <h3>Average points</h3>
+            <h3>Average</h3>
             <div class="pdf-points-value">
               {{ result.averagePointsPerQuestion }}<span class="pdf-score-max"> / 5</span>
             </div>
@@ -124,7 +121,6 @@
         <div class="pdf-interpretation-box">
           <h3>Analysis Result</h3>
           <p class="pdf-main-interpretation">{{ result.interpretation }}</p>
-          <p class="pdf-interpretation-note">{{ result.interpretationNote }}</p>
         </div>
 
         <div class="pdf-score-interpretation">
@@ -140,11 +136,10 @@
               </tr>
             </tbody>
           </table>
-          <p class="pdf-score-interpretation-note">{{ result.interpretationNote }}</p>
         </div>
 
         <div class="pdf-footer">
-          <p>Generated securely by Hatters Assessment Platform</p>
+          <p>Generated securely — Assessment Complete</p>
         </div>
       </div>
     </div>
@@ -178,6 +173,14 @@ const isPdfGenerating = ref(false)
 const isPdfPreviewLoading = ref(false)
 const pdfPreviewUrl = ref('')
 
+function scrollToPageHeader() {
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  document.documentElement.scrollTop = 0
+  document.body.scrollTop = 0
+  const el = document.getElementById('assessment-result-top')
+  el?.scrollIntoView({ block: 'start', behavior: 'auto' })
+}
+
 function isValidSnapshot(data) {
   if (!data || typeof data !== 'object') return false
   if (typeof data.username !== 'string' || !data.username.trim()) return false
@@ -204,7 +207,7 @@ async function generatePdfPreview() {
     const safeName = String(result.value.username).replace(/[^a-z0-9]/gi, '_').toLowerCase()
     const opt = {
       margin: 0.5,
-      filename: `Hatters_Assessment_Report_${safeName}.pdf`,
+      filename: `Assessment_Complete_${safeName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
@@ -213,6 +216,11 @@ async function generatePdfPreview() {
 
     const worker = html2pdf().set(opt).from(element).toPdf()
     const pdf = await worker.get('pdf')
+    pdf.setProperties({
+      title: 'Assessment Complete',
+      subject: '',
+      keywords: 'attention assessment'
+    })
     const blobUrl = pdf.output('bloburl')
 
     if (pdfPreviewUrl.value) {
@@ -240,14 +248,21 @@ async function generatePDF() {
     const safeName = String(result.value.username).replace(/[^a-z0-9]/gi, '_').toLowerCase()
     const opt = {
       margin: 0.5,
-      filename: `Hatters_Assessment_Report_${safeName}.pdf`,
+      filename: `Assessment_Complete_${safeName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
       pagebreak: { mode: ['css', 'legacy'] }
     }
 
-    await html2pdf().set(opt).from(element).save()
+    const worker = html2pdf().set(opt).from(element).toPdf()
+    const pdf = await worker.get('pdf')
+    pdf.setProperties({
+      title: 'Assessment Complete',
+      subject: '',
+      keywords: 'attention assessment'
+    })
+    await worker.save()
     element.style.display = 'none'
   } catch (error) {
     console.error('Error generating PDF:', error)
@@ -265,6 +280,7 @@ function startNewAssessment() {
 }
 
 onMounted(async () => {
+  scrollToPageHeader()
   const raw = sessionStorage.getItem(RESULT_STORAGE_KEY)
   if (!raw) {
     router.replace({ name: 'home' })
@@ -279,7 +295,10 @@ onMounted(async () => {
     }
     result.value = data
     await nextTick()
+    scrollToPageHeader()
     await generatePdfPreview()
+    await nextTick()
+    scrollToPageHeader()
   } catch (e) {
     console.error('Invalid assessment result payload', e)
     sessionStorage.removeItem(RESULT_STORAGE_KEY)
@@ -507,13 +526,7 @@ onUnmounted(() => {
   color: var(--text-primary);
   font-size: 1.35rem;
   font-weight: 800;
-  margin-bottom: 0.35rem;
-}
-
-.results-subtitle {
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  font-weight: 500;
+  margin-bottom: 0.5rem;
 }
 
 .score-section {
@@ -676,13 +689,7 @@ onUnmounted(() => {
 .pdf-preview-title {
   font-size: 1rem;
   color: var(--brand-navy);
-  margin-bottom: 0.2rem;
-}
-
-.pdf-preview-subtitle {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.65rem;
 }
 
 .pdf-preview-frame-wrap {
@@ -792,10 +799,6 @@ onUnmounted(() => {
   letter-spacing: -0.02em;
 }
 
-.gf-forms .gf-results-header .results-subtitle {
-  font-size: 0.875rem !important;
-}
-
 .gf-forms .results-actions {
   gap: 0.5rem;
 }
@@ -830,15 +833,7 @@ onUnmounted(() => {
   color: #111827;
   letter-spacing: 2px;
   text-transform: uppercase;
-  margin: 0 0 10px 0;
-}
-.pdf-doc-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  margin: 0 0 8px 0;
 }
 .pdf-header-divider {
   width: 60px;
@@ -933,12 +928,6 @@ onUnmounted(() => {
   line-height: 1.45;
 }
 
-.pdf-interpretation-note {
-  margin-top: 5px !important;
-  font-size: 10px !important;
-  color: #6b7280 !important;
-}
-
 .pdf-score-interpretation {
   margin-top: 0;
   margin-bottom: 8px;
@@ -991,12 +980,6 @@ onUnmounted(() => {
   line-height: 1.3;
 }
 
-.pdf-score-interpretation-note {
-  margin-top: 6px;
-  font-size: 10px;
-  line-height: 1.35;
-  color: #111827;
-}
 .pdf-footer {
   text-align: center;
   margin-top: 10px;
