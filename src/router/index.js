@@ -5,12 +5,14 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: HelloWorld
+    component: HelloWorld,
+    meta: { integratedSiteHeader: true }
   },
   {
     path: '/result',
     name: 'assessment-result',
-    component: () => import('../components/AssessmentResult.vue')
+    component: () => import('../components/AssessmentResult.vue'),
+    meta: { integratedSiteHeader: true }
   }
 ]
 

@@ -1,151 +1,148 @@
 <template>
-  <div class="assessment-app gf-forms">
+  <div class="assessment-app gf-forms" id="assessment-start">
     <!-- Subtle brand wash (kept light for “form” feel) -->
     <div class="animated-bg" aria-hidden="true">
       <div class="bg-gradient"></div>
       <div class="noise-overlay"></div>
     </div>
 
-    <!-- Google-Form–style sticky progress (thin bar + caption) -->
-    <div class="gf-sticky-progress" :class="{ 'gf-sticky-progress--scrolled': scrolled }">
-      <div class="gf-sticky-progress-inner">
-        <div class="gf-sticky-progress-track" role="progressbar"
-          :aria-valuenow="completionPercent" aria-valuemin="0" aria-valuemax="100"
-          :aria-valuetext="`${completionPercent}% complete, ${answeredCount} of ${questions.length} answered`"
-          aria-label="Form completion">
-          <div class="gf-sticky-progress-fill" :style="{ width: completionPercent + '%' }" />
-        </div>
-        <p class="gf-sticky-progress-meta">
-          {{ answeredCount }} of {{ questions.length }} answered<span class="gf-meta-sep" aria-hidden="true"> · </span><span>{{ completionPercent }}%</span>
-        </p>
-      </div>
+    <!-- Site chrome (scrolls away); progress lives in assessment-scroll-wrap so sticky spans full form -->
+    <div class="assessment-integrated-header">
+      <SelectSiteHeader
+        :show-assessment-intro="true"
+        assessment-title="Attention to Detail Assessment"
+        assessment-description="Evaluate your meticulousness and precision through this assessment. Each statement reflects real-world scenarios that measure your attention to detail."
+      />
     </div>
 
-    <div class="container gf-container">
-      <div class="assessment-card glass-card gf-sheet">
-        <!-- Title block (form header) -->
-        <header class="gf-title-block">
-          <h1 class="gf-main-title">
-            Attention to Detail
-            <span class="title-highlight">Assessment</span>
-          </h1>
-          <p class="gf-description">
-            Evaluate your meticulousness and precision through this assessment.
-            Each statement reflects real-world scenarios that measure your attention to detail.
-          </p>
-        </header>
-
-        <div class="gf-divider" aria-hidden="true" />
-
-        <!-- User Information Section -->
-        <div class="user-info-section gf-form-section">
-          <h2 class="gf-section-title">Your details</h2>
-          <div class="input-group">
-            <label for="username">Full Name <span class="required">*</span></label>
-            <input id="username" type="text" v-model="username" placeholder="Full name" class="premium-input gf-input" autocomplete="name" required aria-required="true" />
-          </div>
-          <div class="input-group">
-            <label for="email">Email <span class="optional">(Optional)</span></label>
-            <input id="email" type="email" v-model="email" placeholder="you@company.com" class="premium-input gf-input" autocomplete="email" inputmode="email" />
-          </div>
-        </div>
-
-        <div class="gf-divider" aria-hidden="true" />
-
-        <!-- Answer scale reference (multiple choice legend) -->
-        <section class="mcq-instructions-panel gf-form-section" aria-labelledby="mcq-instructions-heading">
-          <h2 id="mcq-instructions-heading" class="mcq-instructions-title gf-section-title">How this scale works</h2>
-          <p class="mcq-instructions-lead">
-            Each question lists five choices. Tap or click one row—the left badge shows points (1–5); the label describes how often it applies to you.
-          </p>
-        </section>
-
-        <div class="gf-divider gf-divider--muted" aria-hidden="true" />
-
-        <!-- Questions Section -->
-        <ol class="questions-section" aria-label="Assessment questions">
-          <li v-for="(question, qIndex) in questions" :key="qIndex"
-            class="question-item gf-form-section gf-question-card"
-            :class="{ 'answered': ratings[qIndex] > 0, 'highlighted': highlightedIndex === qIndex }"
-            :style="{ '--gf-q-index': qIndex }"
-            :ref="el => { if (el) questionRefs[qIndex] = el }">
-            <div class="gf-question-head">
-              <span class="gf-question-num-tile" aria-hidden="true">{{ String(qIndex + 1).padStart(2, '0') }}</span>
-              <p class="gf-question-line" :id="'question-text-' + qIndex">
-                <span class="gf-question-text-wrap">
-                  <span class="sr-only">Question {{ qIndex + 1 }} of {{ questions.length }}. </span>
-                  {{ question }}
-                </span>
-              </p>
-              <transition name="gf-chip">
-                <span v-if="ratings[qIndex] > 0" class="gf-answered-chip" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-                  </svg>
-                </span>
-              </transition>
+    <section class="assessment-scroll-wrap" aria-label="Attention to Detail assessment">
+      <div class="assessment-scroll-wrap__inner">
+        <div class="container gf-container">
+          <div class="assessment-card glass-card gf-sheet">
+            <div class="gf-sticky-progress gf-sticky-progress--integrated" :class="{ 'gf-sticky-progress--scrolled': scrolled }">
+              <div class="gf-sticky-progress-inner">
+                <div class="gf-sticky-progress-track" role="progressbar"
+                  :aria-valuenow="completionPercent" aria-valuemin="0" aria-valuemax="100"
+                  :aria-valuetext="`${completionPercent}% complete, ${answeredCount} of ${questions.length} answered`"
+                  aria-label="Form completion">
+                  <div class="gf-sticky-progress-fill" :style="{ width: completionPercent + '%' }" />
+                </div>
+                <p class="gf-sticky-progress-meta">
+                  {{ answeredCount }} of {{ questions.length }} answered<span class="gf-meta-sep" aria-hidden="true"> · </span><span>{{ completionPercent }}%</span>
+                </p>
+              </div>
+            </div>
+            <!-- User Information Section -->
+            <div class="user-info-section gf-form-section">
+              <h2 class="gf-section-title">Your details</h2>
+              <div class="input-group">
+                <label for="username">Full Name <span class="required">*</span></label>
+                <input id="username" type="text" v-model="username" placeholder="Full name" class="premium-input gf-input" autocomplete="name" required aria-required="true" />
+              </div>
+              <div class="input-group">
+                <label for="email">Email <span class="optional">(Optional)</span></label>
+                <input id="email" type="email" v-model="email" placeholder="you@company.com" class="premium-input gf-input" autocomplete="email" inputmode="email" />
+              </div>
             </div>
 
-            <fieldset
-              class="mcq-options gf-mcq-fieldset"
-              :aria-labelledby="'question-text-' + qIndex"
-              @change="onQuestionFieldsetChange(qIndex, $event)"
-            >
-              <legend class="sr-only">Choose one answer for statement {{ qIndex + 1 }} of {{ questions.length }}</legend>
-              <div class="mcq-option-list gf-mcq-list" role="presentation">
-                <label
-                  v-for="value in SCALE_VALUES"
-                  :key="value"
-                  class="mcq-option gf-option-row"
-                  :class="{ 'mcq-option--selected': ratings[qIndex] === value }"
+            <div class="gf-divider" aria-hidden="true" />
+
+            <!-- Answer scale reference (multiple choice legend) -->
+            <section class="mcq-instructions-panel gf-form-section" aria-labelledby="mcq-instructions-heading">
+              <h2 id="mcq-instructions-heading" class="mcq-instructions-title gf-section-title">How this scale works</h2>
+              <p class="mcq-instructions-lead">
+                Each question lists five choices. Tap or click one row—the left badge shows points (1–5); the label describes how often it applies to you.
+              </p>
+            </section>
+
+            <div class="gf-divider gf-divider--muted" aria-hidden="true" />
+
+            <!-- Questions Section -->
+            <ol class="questions-section" aria-label="Assessment questions">
+              <li v-for="(question, qIndex) in questions" :key="qIndex"
+                class="question-item gf-form-section gf-question-card"
+                :class="{ 'answered': ratings[qIndex] > 0, 'highlighted': highlightedIndex === qIndex }"
+                :style="{ '--gf-q-index': qIndex }"
+                :ref="el => { if (el) questionRefs[qIndex] = el }">
+                <div class="gf-question-head">
+                  <span class="gf-question-num-tile" aria-hidden="true">{{ String(qIndex + 1).padStart(2, '0') }}</span>
+                  <p class="gf-question-line" :id="'question-text-' + qIndex">
+                    <span class="gf-question-text-wrap">
+                      <span class="sr-only">Question {{ qIndex + 1 }} of {{ questions.length }}. </span>
+                      {{ question }}
+                    </span>
+                  </p>
+                  <transition name="gf-chip">
+                    <span v-if="ratings[qIndex] > 0" class="gf-answered-chip" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                      </svg>
+                    </span>
+                  </transition>
+                </div>
+
+                <fieldset
+                  class="mcq-options gf-mcq-fieldset"
+                  :aria-labelledby="'question-text-' + qIndex"
+                  @change="onQuestionFieldsetChange(qIndex, $event)"
                 >
-                  <input
-                    :id="'q-' + qIndex + '-opt-' + value"
-                    type="radio"
-                    class="mcq-radio-native gf-radio gf-radio-hit"
-                    :name="'attention-assessment-q-' + qIndex"
-                    :checked="ratings[qIndex] === value"
-                    :value="String(value)"
-                  />
-                  <span class="mcq-option-card gf-option-body">
-                    <span class="sr-only">{{ pointsLabel(value) }}.</span>
-                    <span class="mcq-option-score-badge" aria-hidden="true">{{ value }} pt{{ value === 1 ? '' : 's' }}</span>
-                    <span class="mcq-option-caption">{{ tooltipMeaning[value] }}</span>
-                  </span>
-                </label>
+                  <legend class="sr-only">Choose one answer for statement {{ qIndex + 1 }} of {{ questions.length }}</legend>
+                  <div class="mcq-option-list gf-mcq-list" role="presentation">
+                    <label
+                      v-for="value in SCALE_VALUES"
+                      :key="value"
+                      class="mcq-option gf-option-row"
+                      :class="{ 'mcq-option--selected': ratings[qIndex] === value }"
+                    >
+                      <input
+                        :id="'q-' + qIndex + '-opt-' + value"
+                        type="radio"
+                        class="mcq-radio-native gf-radio gf-radio-hit"
+                        :name="'attention-assessment-q-' + qIndex"
+                        :checked="ratings[qIndex] === value"
+                        :value="String(value)"
+                      />
+                      <span class="mcq-option-card gf-option-body">
+                        <span class="sr-only">{{ pointsLabel(value) }}.</span>
+                        <span class="mcq-option-score-badge" aria-hidden="true">{{ value }} pt{{ value === 1 ? '' : 's' }}</span>
+                        <span class="mcq-option-caption">{{ tooltipMeaning[value] }}</span>
+                      </span>
+                    </label>
+                  </div>
+                </fieldset>
+
+                <div v-if="qIndex < questions.length - 1" class="gf-divider gf-divider--inset" aria-hidden="true" />
+              </li>
+            </ol>
+
+            <!-- Submit row -->
+            <div class="submission-section gf-submit-band">
+              <div class="submission-copy">
+                <p class="submission-title">Submit</p>
+                <p class="submission-note">
+                  {{ answeredCount }} of {{ questions.length }} questions answered. Answer every required question to submit.
+                </p>
               </div>
-            </fieldset>
-
-            <div v-if="qIndex < questions.length - 1" class="gf-divider gf-divider--inset" aria-hidden="true" />
-          </li>
-        </ol>
-
-        <!-- Submit row -->
-        <div class="submission-section gf-submit-band">
-          <div class="submission-copy">
-            <p class="submission-title">Submit</p>
-            <p class="submission-note">
-              {{ answeredCount }} of {{ questions.length }} questions answered. Answer every required question to submit.
-            </p>
-          </div>
-          <div class="action-buttons gf-submit-actions">
-            <button type="button" class="btn-primary gf-submit-btn" :class="{ 'loading': isSubmitting }" :disabled="isSubmitting"
-              @click="submitAssessment">
-              <span v-if="!isSubmitting">
-                Complete Assessment
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path d="M5 12h14M13 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-              <span v-else class="gf-loading-row">
-                <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
-                Processing...
-              </span>
-            </button>
+              <div class="action-buttons gf-submit-actions">
+                <button type="button" class="btn-primary gf-submit-btn" :class="{ 'loading': isSubmitting }" :disabled="isSubmitting"
+                  @click="submitAssessment">
+                  <span v-if="!isSubmitting">
+                    Complete Assessment
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M5 12h14M13 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                  <span v-else class="gf-loading-row">
+                    <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
+                    Processing...
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -153,6 +150,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
+import SelectSiteHeader from './SelectSiteHeader.vue'
 import {
   questions,
   interpretationNote,
@@ -432,7 +430,10 @@ onUnmounted(() => {
   --theme-chip-text-d: #3d6220;
   --theme-chip-text-e: #0a6270;
 
-  min-height: 100vh;
+  flex: 1 1 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(ellipse 82% 78% at 0% 100%, rgba(240, 228, 0, 0.22) 0%, transparent 55%),
     radial-gradient(ellipse 78% 72% at 100% 100%, rgba(0, 43, 92, 0.085) 0%, transparent 52%),
@@ -1322,11 +1323,51 @@ onUnmounted(() => {
 }
 
 .gf-forms.assessment-app {
+  --shell-gutter: clamp(0.85rem, 3vw, 1.75rem);
+  --shell-inner-gutter: clamp(1.35rem, 4vw, 2.75rem);
+  --shell-max-width: 1280px;
+
   background:
     radial-gradient(ellipse 76% 64% at 100% 0%, rgba(0, 139, 139, 0.06) 0%, transparent 50%),
     var(--gf-page-tint) !important;
-  padding-left: clamp(0.85rem, 3vw, 1.75rem);
-  padding-right: clamp(0.85rem, 3vw, 1.75rem);
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: var(--shell-gutter);
+  padding-right: var(--shell-gutter);
+}
+
+.assessment-integrated-header {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  margin-left: calc(-1 * var(--shell-gutter));
+  margin-right: calc(-1 * var(--shell-gutter));
+  width: calc(100% + 2 * var(--shell-gutter));
+  background: #ffffff;
+  box-shadow: none;
+}
+
+.assessment-integrated-header :deep(.select-site-header) {
+  box-shadow: none;
+}
+
+/* Sticky progress must sit inside a tall parent (this wrap includes title + full form). */
+.assessment-scroll-wrap {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-left: calc(-1 * var(--shell-gutter));
+  margin-right: calc(-1 * var(--shell-gutter));
+  width: calc(100% + 2 * var(--shell-gutter));
+  background: #ffffff;
+  box-shadow: none;
+  padding-bottom: clamp(1rem, 3vw, 1.75rem);
+}
+
+.assessment-scroll-wrap__inner {
+  max-width: var(--shell-max-width);
+  margin: 0 auto;
 }
 
 .gf-forms .animated-bg {
@@ -1368,6 +1409,31 @@ onUnmounted(() => {
   box-shadow: 0 1px 0 rgba(0, 43, 92, 0.04), 0 4px 12px rgba(60, 64, 67, 0.08);
 }
 
+.gf-forms .gf-sticky-progress.gf-sticky-progress--integrated {
+  margin: 0;
+  padding: 0.65rem 0 0.45rem;
+  background: #ffffff;
+  border-bottom: 0;
+  backdrop-filter: none;
+  border-top-left-radius: var(--gf-radius);
+  border-top-right-radius: var(--gf-radius);
+  z-index: 2;
+}
+
+.gf-forms .gf-sticky-progress.gf-sticky-progress--integrated .gf-sticky-progress-inner {
+  max-width: 640px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: var(--shell-inner-gutter);
+  padding-right: var(--shell-inner-gutter);
+  box-sizing: border-box;
+}
+
+.gf-forms .gf-sticky-progress.gf-sticky-progress--integrated.gf-sticky-progress--scrolled {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px) saturate(1.4);
+}
+
 .gf-sticky-progress-track {
   height: 4px;
   border-radius: 2px;
@@ -1401,17 +1467,29 @@ onUnmounted(() => {
 }
 
 .gf-sheet.assessment-card {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   border-radius: var(--gf-radius) !important;
-  overflow: hidden;
+  /* Allow the integrated sticky progress row to stick while scrolling. */
+  overflow: visible;
   background: var(--gf-sheet) !important;
-  border: 1px solid var(--gf-line) !important;
+  border: 1px solid transparent !important;
+  position: relative;
   box-shadow:
     0 1px 2px rgba(60, 64, 67, 0.1),
     0 2px 8px rgba(60, 64, 67, 0.06),
     0 0 0 1px rgba(255, 255, 255, 0.65) inset;
   backdrop-filter: none !important;
   animation: gf-sheet-rise 0.72s var(--gf-motion-ease-out) both;
+}
+
+.gf-sheet.assessment-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--gf-radius);
+  border: 1px solid var(--gf-line);
+  pointer-events: none;
+  z-index: 3;
 }
 
 .gf-sheet.glass-card::before {

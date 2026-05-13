@@ -5,89 +5,95 @@
       <div class="noise-overlay"></div>
     </div>
 
-    <div class="container gf-container">
-      <div class="assessment-card glass-card gf-sheet">
-        <div v-if="result" class="results-panel gf-results-sheet">
-          <div class="results-header gf-results-header">
-            <h2>Assessment Complete</h2>
-          </div>
+    <div class="assessment-integrated-header">
+      <SelectSiteHeader />
+    </div>
 
-          <div class="score-section">
-            <div class="score-headline" aria-live="polite">
-              <span class="score-number">{{ result.totalScore }}</span>
-              <span class="score-max">/ {{ maxScore }}</span>
+    <section class="assessment-scroll-wrap" aria-label="Assessment result">
+      <div class="assessment-scroll-wrap__inner">
+        <div class="container gf-container">
+          <div v-if="result" class="results-panel gf-results-sheet">
+            <div class="results-header gf-results-header">
+              <h2>Assessment Complete</h2>
             </div>
-            <div class="score-metrics">
-              <div class="metric">
-                <span class="metric-value">{{ result.completionPercent }}%</span>
-                <span class="metric-label">Completion</span>
+
+            <section class="score-section" aria-label="Assessment summary">
+              <div class="score-headline" aria-live="polite">
+                <span class="score-number">{{ result.totalScore }}</span>
+                <span class="score-max">/ {{ maxScore }}</span>
               </div>
-              <div class="metric-divider"></div>
-              <div class="metric">
-                <span class="metric-value">{{ result.averagePointsPerQuestion }}</span>
-                <span class="metric-label">Average Score</span>
+              <div class="score-metrics">
+                <div class="metric">
+                  <span class="metric-value">{{ result.completionPercent }}%</span>
+                  <span class="metric-label">Completion</span>
+                </div>
+                <div class="metric-divider"></div>
+                <div class="metric">
+                  <span class="metric-value">{{ result.averagePointsPerQuestion }}</span>
+                  <span class="metric-label">Average Score</span>
+                </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          <div class="interpretation-card">
-            <div class="interpretation-badge">Analysis Result</div>
-            <p class="interpretation-text">{{ result.interpretation }}</p>
-            <p class="interpretation-note">{{ result.interpretationNote }}</p>
-            <div class="interpretation-bars">
-              <div class="bar" :style="{ width: '100%' }" data-level="excellent"></div>
-              <div class="bar" :style="{ width: result.totalScore >= 50 ? '100%' : '0%' }" data-level="above"></div>
-              <div class="bar" :style="{ width: result.totalScore >= 35 ? '100%' : '0%' }" data-level="average"></div>
-            </div>
-          </div>
-
-          <div class="results-actions">
-            <button type="button" class="btn-outline" @click="startNewAssessment">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
-                <path d="M21 3v5h-5" />
-                <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
-                <path d="M3 21v-5h5" />
-              </svg>
-              New Assessment
-            </button>
-            <button
-              type="button"
-              class="btn-outline gf-results-pdf-btn"
-              :class="{ loading: isPdfGenerating }"
-              :disabled="isPdfGenerating"
-              @click="generatePDF"
-              :aria-busy="isPdfGenerating"
-            >
-              <span v-if="!isPdfGenerating">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <div class="results-actions">
+              <button type="button" class="btn-outline" @click="startNewAssessment">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />
+                  <path d="M21 3v5h-5" />
+                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16" />
+                  <path d="M3 21v-5h5" />
                 </svg>
-                Download PDF
-              </span>
-              <span v-else class="gf-loading-row">
-                <span class="gf-loading-bars" aria-hidden="true"><span /><span /><span /></span>
-                Generating PDF...
-              </span>
-            </button>
-          </div>
-
-          <div class="pdf-preview-panel">
-            <h3 class="pdf-preview-title">PDF Preview</h3>
-            <div class="pdf-preview-frame-wrap">
-              <div v-if="isPdfPreviewLoading" class="pdf-preview-loading">Generating preview...</div>
-              <iframe
-                v-else-if="pdfPreviewUrl"
-                :src="pdfPreviewUrl"
-                class="pdf-preview-frame"
-                title="Assessment PDF preview"
-              />
-              <div v-else class="pdf-preview-loading">Preview unavailable. Use Download PDF.</div>
+                New Assessment
+              </button>
+              <button
+                type="button"
+                class="btn-outline gf-results-pdf-btn"
+                :class="{ loading: isPdfGenerating }"
+                :disabled="isPdfGenerating"
+                @click="generatePDF"
+                :aria-busy="isPdfGenerating"
+              >
+                <span v-if="!isPdfGenerating">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  Download PDF
+                </span>
+                <span v-else class="gf-loading-row">
+                  <span class="gf-loading-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+                  Generating PDF...
+                </span>
+              </button>
             </div>
+
+            <section class="interpretation-card" aria-label="Analysis summary">
+              <div class="interpretation-badge">Analysis Result</div>
+              <p class="interpretation-text">{{ result.interpretation }}</p>
+              <p class="interpretation-note">{{ result.interpretationNote }}</p>
+              <div class="interpretation-bars">
+                <div class="bar" :style="{ width: '100%' }" data-level="excellent"></div>
+                <div class="bar" :style="{ width: result.totalScore >= 50 ? '100%' : '0%' }" data-level="above"></div>
+                <div class="bar" :style="{ width: result.totalScore >= 35 ? '100%' : '0%' }" data-level="average"></div>
+              </div>
+            </section>
+
+            <section class="pdf-preview-panel" aria-label="PDF preview panel">
+              <h3 class="pdf-preview-title">PDF Preview</h3>
+              <div class="pdf-preview-frame-wrap">
+                <div v-if="isPdfPreviewLoading" class="pdf-preview-loading">Generating preview...</div>
+                <iframe
+                  v-else-if="pdfPreviewUrl"
+                  :src="pdfPreviewUrl"
+                  class="pdf-preview-frame"
+                  title="Assessment PDF preview"
+                ></iframe>
+                <div v-else class="pdf-preview-loading">Preview unavailable. Use Download PDF.</div>
+              </div>
+            </section>
           </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <div v-if="result" id="pdf-report-template" style="display: none">
       <div class="hatters-pdf-wrapper">
@@ -150,6 +156,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import html2pdf from 'html2pdf.js'
+import SelectSiteHeader from './SelectSiteHeader.vue'
 import { questions, RESULT_STORAGE_KEY } from '../assessmentData.js'
 
 const router = useRouter()
@@ -341,7 +348,10 @@ onUnmounted(() => {
   --text-muted: #64748b;
   --text-soft: #475569;
 
-  min-height: 100vh;
+  flex: 1 1 auto;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   background:
     radial-gradient(ellipse 82% 78% at 0% 100%, rgba(240, 228, 0, 0.22) 0%, transparent 55%),
     radial-gradient(ellipse 78% 72% at 100% 100%, rgba(0, 43, 92, 0.085) 0%, transparent 52%),
@@ -372,11 +382,43 @@ onUnmounted(() => {
 }
 
 .gf-forms.assessment-app {
-  background:
-    radial-gradient(ellipse 76% 64% at 100% 0%, rgba(0, 139, 139, 0.06) 0%, transparent 50%),
-    var(--gf-page-tint) !important;
-  padding-left: clamp(0.85rem, 3vw, 1.75rem);
-  padding-right: clamp(0.85rem, 3vw, 1.75rem);
+  --shell-gutter: clamp(0.85rem, 3vw, 1.75rem);
+  background: #ffffff !important;
+  padding-top: 0;
+  padding-left: var(--shell-gutter);
+  padding-right: var(--shell-gutter);
+}
+
+.assessment-integrated-header {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  margin-left: calc(-1 * var(--shell-gutter));
+  margin-right: calc(-1 * var(--shell-gutter));
+  width: calc(100% + 2 * var(--shell-gutter));
+  background: #ffffff;
+  box-shadow: 0 1px 0 rgba(0, 51, 78, 0.1);
+}
+
+.assessment-integrated-header :deep(.select-site-header) {
+  box-shadow: none;
+}
+
+.assessment-scroll-wrap {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-left: calc(-1 * var(--shell-gutter));
+  margin-right: calc(-1 * var(--shell-gutter));
+  width: calc(100% + 2 * var(--shell-gutter));
+  background: #ffffff;
+  padding-bottom: clamp(0.45rem, 1.6vw, 0.85rem);
+}
+
+.assessment-scroll-wrap__inner {
+  max-width: 1280px;
+  margin: 0 auto;
 }
 
 .animated-bg {
@@ -390,7 +432,7 @@ onUnmounted(() => {
 }
 
 .gf-forms .animated-bg {
-  opacity: 0.42;
+  display: none;
 }
 
 .bg-gradient {
@@ -508,14 +550,12 @@ onUnmounted(() => {
 }
 
 .results-panel {
-  margin: 1.8rem clamp(1rem, 2.5vw, 2rem) 1.1rem;
-  padding: 1.4rem clamp(1rem, 2vw, 1.6rem);
-  border: 1px solid rgba(0, 139, 139, 0.18);
-  border-radius: 1.15rem;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 253, 250, 0.5) 100%);
-  box-shadow:
-    0 16px 40px rgba(0, 43, 92, 0.07),
-    0 0 0 1px rgba(240, 228, 0, 0.08);
+  margin: 1rem clamp(1.05rem, 3vw, 1.65rem) 1.1rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .results-header {
@@ -526,15 +566,19 @@ onUnmounted(() => {
   color: var(--text-primary);
   font-size: 1.35rem;
   font-weight: 800;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.35rem;
 }
 
 .score-section {
-  margin-top: 1rem;
+  margin-top: 0.35rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(0, 139, 139, 0.18);
+  border-radius: 0.95rem;
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .interpretation-card {
-  margin-top: 1rem;
+  margin-top: 1.15rem;
   padding: 1rem 1.1rem;
   border-radius: 0.95rem;
   border: 1px solid rgba(0, 139, 139, 0.22);
@@ -668,7 +712,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.75rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
+  margin-top: 0.95rem;
 }
 
 .interpretation-note {
@@ -679,7 +723,7 @@ onUnmounted(() => {
 }
 
 .pdf-preview-panel {
-  margin-top: 1.2rem;
+  margin-top: 1rem;
   border: 1px solid rgba(0, 139, 139, 0.22);
   background: #ffffff;
   border-radius: 0.9rem;
@@ -783,13 +827,12 @@ onUnmounted(() => {
 }
 
 .gf-forms .results-panel.gf-results-sheet {
-  margin: 1rem clamp(1.05rem, 3vw, 1.65rem) 1.75rem !important;
-  border-radius: var(--gf-radius) !important;
-  border: 1px solid var(--gf-line) !important;
-  box-shadow:
-    0 1px 2px rgba(60, 64, 67, 0.1),
-    0 4px 12px rgba(60, 64, 67, 0.05);
-  padding-bottom: 0.25rem;
+  margin: 1rem clamp(1.05rem, 3vw, 1.65rem) 1rem !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  padding-bottom: 0;
 }
 
 .gf-forms .results-header h2 {
