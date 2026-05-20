@@ -4,7 +4,6 @@
     <main class="site-shell__main">
       <router-view />
     </main>
-    <SelectSiteFooter />
   </div>
 </template>
 
@@ -12,7 +11,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import SelectSiteHeader from './components/SelectSiteHeader.vue'
-import SelectSiteFooter from './components/SelectSiteFooter.vue'
 
 const route = useRoute()
 const showShellHeader = computed(() => !route.meta.integratedSiteHeader)

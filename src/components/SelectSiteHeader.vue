@@ -1,23 +1,7 @@
 <template>
   <header class="select-site-header">
     <div class="select-site-header__accent" aria-hidden="true" />
-    <div class="select-site-header__bar">
-      <RouterLink to="/" class="select-site-header__brand">
-        <img
-          class="select-site-header__logo-img"
-          :src="logoSrc"
-          alt="Select"
-        />
-      </RouterLink>
-      <div class="select-site-header__tagline" aria-label="Company tagline">
-        <p class="select-site-header__tagline-line">
-          When <em>employees</em> thrive,
-        </p>
-        <p class="select-site-header__tagline-line">
-          <em>organisations</em> thrive
-        </p>
-      </div>
-    </div>
+
     <div
       v-if="showAssessmentIntro"
       class="select-site-header__intro-wrap"
@@ -33,7 +17,7 @@
 </template>
 
 <script setup>
-import { RouterLink } from 'vue-router'
+
 defineProps({
   showAssessmentIntro: { type: Boolean, default: false },
   assessmentTitle: { type: String, default: 'Attention to Detail Assessment' },
@@ -44,8 +28,7 @@ defineProps({
   }
 })
 
-/** Served from `public/`; respects Vite `base` (e.g. GitHub Pages). */
-const logoSrc = `${import.meta.env.BASE_URL}select-logo.png`
+
 </script>
 
 <style scoped>
@@ -130,7 +113,7 @@ const logoSrc = `${import.meta.env.BASE_URL}select-logo.png`
 }
 
 .select-site-header__intro-wrap {
-  border-top: 1px solid rgba(0, 51, 78, 0.08);
+  border-top: none;
 }
 
 .select-site-header__intro {
